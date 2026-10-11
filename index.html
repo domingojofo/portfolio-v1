@@ -3,752 +3,219 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jofo Domingo — Design</title>
-  <meta name="description" content="Hello! Kamusta? I’m Jofo Domingo. Welcome to my little nook on the wild wild web.">
-  <!-- Self-hosted fonts. The loader fonts and the intro text font are preloaded because they show first. -->
-  <link rel="preload" href="fonts/general-sans-600.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/newsreader-italic-calloused.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/general-sans-400.woff2" as="font" type="font/woff2" crossorigin>
-  <style>
-    @font-face {
-      font-family: "General Sans";
-      font-style: normal;
-      font-weight: 400;
-      font-display: swap;
-      src: url(fonts/general-sans-400.woff2) format("woff2");
-    }
-    @font-face {
-      font-family: "General Sans";
-      font-style: normal;
-      font-weight: 600;
-      font-display: swap;
-      src: url(fonts/general-sans-600.woff2) format("woff2");
-    }
-    @font-face {
-      font-family: "Geist Mono";
-      font-style: normal;
-      font-weight: 400;
-      font-display: swap;
-      src: url(fonts/geist-mono-400-latin.woff2) format("woff2");
-    }
-    /* Logo only — subset to the letters of the name (2 KB) */
-    @font-face {
-      font-family: "Brygada 1918";
-      font-style: italic;
-      font-weight: 600;
-      font-display: swap;
-      src: url(fonts/brygada-1918-italic-600-logo.woff2) format("woff2");
-    }
-    /* Serif italic for "calloused" in the loader — subset to just those letters (1.6 KB) */
-    @font-face {
-      font-family: "Newsreader";
-      font-style: italic;
-      font-weight: 400;
-      font-display: swap;
-      src: url(fonts/newsreader-italic-calloused.woff2) format("woff2");
-    }
-
-    :root {
-      --bg: #D9D9D2;
-      --panel: #ECECE7;
-      --fg: #1E1E1E;
-      --key: #464444;
-      --muted: #5f5e58;
-      --line: rgba(27, 22, 20, .2);
-      --dash: repeating-linear-gradient(to bottom, var(--line) 0 5px, transparent 5px 10px);
-      --ease: cubic-bezier(.7, 0, .3, 1);
-      --ease-out: cubic-bezier(.16, 1, .3, 1);
-
-      --sans: "General Sans", system-ui, sans-serif;
-      --mono: "Geist Mono", ui-monospace, monospace;
-
-      /* Layout (desktop values from the 1512px design, scaled down on smaller screens) */
-      --rail-x: clamp(16px, 3.64vw, 55px);          /* dashed rail, from the left edge */
-      --rail-bottom: 82px;                          /* where the rail stops, from the bottom */
-      --content-x: calc(var(--rail-x) + 19px);      /* intro text + logo */
-      --left: clamp(300px, 27.8vw, 440px);          /* left column width */
-      --gutter-r: clamp(16px, 3vw, 45px);           /* space right of the projects panel */
-      --header-h: 74px;
-      --btn-radius: 4px;                            /* every CTA button */
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body { background: var(--bg); color: var(--fg); }
-    body {
-      font-family: var(--sans);
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-    }
-    body.loading { overflow: hidden; }
-    a { color: inherit; text-decoration: none; }
-    [hidden] { display: none !important; }
-
-    .sr-only {
-      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-      overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
-    }
-
-    /* ---------- Loader ---------- */
-    #loader {
-      position: fixed;
-      inset: 0;
-      z-index: 100;
-      background: var(--bg);
-      transition: opacity .6s ease, visibility .6s;
-    }
-    #loader.done { opacity: 0; visibility: hidden; }
-
-    /* Dashed line draws down from the top and eases to a stop level with the text.
-       It sits exactly where the page's rail is, so it carries straight into the page.
-       clip-path reveals it, so the dashes keep their size while it grows. */
-    .loader__dash {
-      position: absolute;
-      left: var(--rail-x);
-      top: 0;
-      bottom: var(--rail-bottom);
-      width: 1px;
-      background: var(--dash);
-      clip-path: inset(0 0 100% 0);
-      transition: clip-path 1.6s var(--ease-out);
-    }
-    #loader.in .loader__dash { clip-path: inset(0 0 0 0); }
-
-    .loader__words {
-      position: absolute;
-      left: var(--content-x);
-      bottom: var(--rail-bottom);
-      font-weight: 600;
-      font-size: clamp(1.4rem, 1rem + 1.6vw, 2.25rem);
-      line-height: 1.12;
-      letter-spacing: -.01em;
-    }
-    .loader__row { display: block; white-space: nowrap; }
-    .loader__row + .loader__row { padding-left: 1.3em; }
-
-    /* Words rise in one after another, starting as the line eases to a stop */
-    .loader__words .w {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(.45em);
-      filter: blur(4px);
-      transition: opacity .7s ease, transform .9s var(--ease-out), filter .7s ease;
-      transition-delay: calc(.7s + var(--i) * 120ms);
-    }
-    #loader.in .w { opacity: 1; transform: none; filter: none; }
-
-    .loader__words .w--serif {
-      font-family: "Newsreader", Georgia, serif;
-      font-style: italic;
-      font-weight: 400;
-      font-size: 1.1em;
-      letter-spacing: 0;
-    }
-
-    /* ---------- Page layout ---------- */
-    .app { transition: opacity .8s ease .1s, transform .8s var(--ease) .1s; }
-    body.loading .app { opacity: 0; transform: translateY(16px); }
-
-    .rail {
-      position: fixed;
-      left: var(--rail-x);
-      top: 0;
-      bottom: var(--rail-bottom);
-      width: 1px;
-      background: var(--dash);
-      pointer-events: none;
-    }
-
-    /* Header */
-    .site-header {
-      display: grid;
-      grid-template-columns: var(--left) 1fr auto;
-      align-items: center;
-      height: var(--header-h);
-      padding-right: calc(var(--gutter-r) + clamp(0px, 1.6vw, 25px));
-    }
-    .logo {
-      padding-left: var(--content-x);
-      font-family: "Brygada 1918", Georgia, serif;
-      font-style: italic;
-      font-weight: 600;
-      font-size: 15px;
-      line-height: 18px;
-      letter-spacing: -.03em;
-      white-space: nowrap;
-    }
-
-    .mono {
-      font-family: var(--mono);
-      font-size: 15px;
-      line-height: 20px;
-      text-transform: uppercase;
-    }
-
-    /* The chevron hangs to the left of the current section, so links never shift */
-    .nav { display: flex; align-items: center; gap: 24px; padding-left: 18px; }
-    .nav a { position: relative; display: inline-flex; align-items: center; }
-    .nav svg {
-      position: absolute;
-      left: -18px;
-      width: 9px;
-      height: 12px;
-      opacity: 0;
-      transform: translateX(-4px);
-      transition: opacity .3s ease, transform .3s var(--ease-out);
-    }
-    .nav a[aria-current="page"] svg { opacity: 1; transform: none; }
-
-    /* Hover: each letter rolls inward on a little 3D cube, one after another.
-       Letters are split into .roll__c spans by JS; each has a front face and
-       an identical face on the cube's underside that rotates into view. */
-    .roll { display: inline-flex; perspective: 400px; }
-    .roll__c {
-      position: relative;
-      display: inline-block;
-      transform-style: preserve-3d;
-      transform: translateZ(-10px);
-      transition: transform .5s var(--ease-out);
-      transition-delay: calc(var(--i) * 25ms);
-    }
-    .roll__c > span { display: block; white-space: pre; backface-visibility: hidden; }
-    .roll__c > span:first-child { transform: translateZ(10px); }
-    .roll__c > span:last-child { position: absolute; inset: 0; transform: rotateX(-90deg) translateZ(10px); }
-    .nav a:hover .roll__c,
-    .nav a:focus-visible .roll__c { transform: translateZ(-10px) rotateX(90deg); }
-    .nav a:focus-visible { outline: none; }
-
-    .actions { display: flex; align-items: center; gap: 12px; }
-
-    .btn-resume {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      height: 35px;
-      padding: 0 6px 0 12px;
-      border: 1px dashed var(--line);
-      border-radius: var(--btn-radius);
-      transition: border-color .2s ease, background-color .2s ease;
-    }
-    .btn-resume:hover,
-    .btn-resume:focus-visible { border-color: var(--fg); background: var(--panel); outline: none; }
-
-    /* Menu button: dark key with an offset "shadow" key behind it; it presses down on hover */
-    .cmdk-trigger {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      height: 35px;
-      padding: 8px 6px 8px 12px;
-      border: 0;
-      border-radius: var(--btn-radius);
-      background: var(--fg);
-      color: var(--bg);
-      box-shadow: 1px 2px 0 var(--key);
-      cursor: pointer;
-      transition: transform .12s ease, box-shadow .12s ease;
-    }
-    .cmdk-trigger:hover,
-    .cmdk-trigger:focus-visible { transform: translate(1px, 2px); box-shadow: 0 0 0 var(--key); outline: none; }
-    /* Keyboard shortcut chip inside a button */
-    .shortcut {
-      display: inline-flex;
-      align-items: center;
-      gap: 1px;
-      height: 20px;
-      padding: 0 3px;
-      border-radius: calc(var(--btn-radius) - 1px);
-      background: var(--key);
-    }
-    .shortcut svg { width: 12px; height: 12px; }
-    .btn-resume .shortcut { background: rgba(27, 22, 20, .08); }
-
-    /* Left column */
-    .intro p {
-      max-width: 288px;
-      font-size: 18px;
-      line-height: 24px;
-    }
-    .intro p + p { margin-top: 25px; }
-
-    .status { display: flex; justify-content: space-between; gap: 24px; white-space: nowrap; }
-    .status__place { display: flex; gap: 10px; }
-    .status time { font-variant-numeric: tabular-nums; }
-
-    /* Projects panel */
-    .panel {
-      background: var(--panel);
-      border-radius: 10px;
-      padding: 9px;
-    }
-    .projects {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      align-items: start;
-    }
-    .projects__col { display: flex; flex-direction: column; gap: 8px; }
-    /* Staggered heights: left column tall/short, right column short/tall */
-    .projects__col:first-child .card:nth-child(odd),
-    .projects__col:last-child .card:nth-child(even) { aspect-ratio: 510.5 / 495; }
-    .projects__col:first-child .card:nth-child(even),
-    .projects__col:last-child .card:nth-child(odd) { aspect-ratio: 510.5 / 382; }
-
-    /* Desktop: fixed frame — header on top, intro on the left, projects panel scrolls on its own */
-    @media (min-width: 900px) {
-      body { overflow: hidden; }
-      .app {
-        display: grid;
-        grid-template-columns: var(--left) 1fr;
-        grid-template-rows: var(--header-h) minmax(0, 1fr);   /* minmax(0) lets the panel scroll instead of growing */
-        height: 100vh;
-        height: 100dvh;
-      }
-      .site-header { grid-column: 1 / -1; }
-      .intro { position: relative; padding: 1px 24px 0 var(--content-x); }
-      .status {
-        position: absolute;
-        left: var(--rail-x);
-        right: 24px;
-        bottom: 19px;
-      }
-      .panel {
-        margin-right: var(--gutter-r);
-        border-radius: 10px 10px 0 0;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        scrollbar-width: thin;
-        scrollbar-color: rgba(27, 22, 20, .25) transparent;
-      }
-    }
-
-    /* Nav links only fit on wide screens; below that they live in the menu */
-    @media (max-width: 1199px) {
-      .nav { display: none; }
-    }
-
-    /* Tablet + phone: normal page scroll, sticky header, stacked columns */
-    @media (max-width: 899px) {
-      :root { --header-h: 60px; --rail-bottom: 48px; --content-x: 16px; }
-      .rail { display: none; }
-      .site-header {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        grid-template-columns: 1fr auto;
-        padding-right: 16px;
-        background: var(--bg);
-      }
-      .logo { padding-left: 16px; }
-      .mono { font-size: 13px; }
-      .intro { padding: 8px 16px 0; }
-      .intro p { font-size: 17px; }
-      .status { justify-content: flex-start; margin: 28px 0 24px; }
-      .panel { margin: 0 8px 8px; padding: 8px; }
-    }
-    @media (max-width: 599px) {
-      .projects { grid-template-columns: 1fr; }
-      .actions { gap: 8px; }
-    }
-
-    /* ---------- Project cards ---------- */
-    /* Card: page-coloured, light dashed stroke, dark tapered corner pieces; fills dark on hover. */
-    .card {
-      --corner: 24px;
-      --radius: 10px;
-      position: relative;
-      display: flex;
-      align-items: flex-end;
-      padding: 16px;
-      border: 1px dashed var(--line);
-      border-radius: var(--radius);
-      background: var(--bg);
-      transition: background-color .3s ease, border-color .3s ease;
-    }
-    /* Corner pieces: rounded outside, thick at the corner and tapering to a
-       point along each edge. One SVG shape, mirrored into each corner and
-       used as a mask so it takes the --fg colour. */
-    .card::before {
-      content: "";
-      position: absolute;
-      inset: -1px;
-      z-index: 2;
-      pointer-events: none;
-      background: var(--fg);
-      --tl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M24 0H10A10 10 0 0 0 0 10V24C1.2 5 5 1.2 24 0Z'/%3E%3C/svg%3E");
-      --tr: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath transform='matrix(-1 0 0 1 24 0)' d='M24 0H10A10 10 0 0 0 0 10V24C1.2 5 5 1.2 24 0Z'/%3E%3C/svg%3E");
-      --bl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath transform='matrix(1 0 0 -1 0 24)' d='M24 0H10A10 10 0 0 0 0 10V24C1.2 5 5 1.2 24 0Z'/%3E%3C/svg%3E");
-      --br: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath transform='matrix(-1 0 0 -1 24 24)' d='M24 0H10A10 10 0 0 0 0 10V24C1.2 5 5 1.2 24 0Z'/%3E%3C/svg%3E");
-      -webkit-mask:
-        var(--tl) top left     / var(--corner) var(--corner) no-repeat,
-        var(--tr) top right    / var(--corner) var(--corner) no-repeat,
-        var(--bl) bottom left  / var(--corner) var(--corner) no-repeat,
-        var(--br) bottom right / var(--corner) var(--corner) no-repeat;
-              mask:
-        var(--tl) top left     / var(--corner) var(--corner) no-repeat,
-        var(--tr) top right    / var(--corner) var(--corner) no-repeat,
-        var(--bl) bottom left  / var(--corner) var(--corner) no-repeat,
-        var(--br) bottom right / var(--corner) var(--corner) no-repeat;
-    }
-    .card:hover,
-    .card:focus-visible {
-      border-color: var(--fg);
-      background-color: var(--fg);
-      outline: none;
-    }
-
-    /* Label: hidden at rest (cards are clean like the design), appears on hover */
-    .card__label {
-      position: relative;
-      z-index: 1;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-family: var(--mono);
-      font-size: 13px;
-      text-transform: uppercase;
-      color: var(--bg);
-      opacity: 0;
-      transform: translateY(4px);
-      transition: opacity .3s ease, transform .3s ease;
-    }
-    .card:hover .card__label,
-    .card:focus-visible .card__label { opacity: 1; transform: none; }
-
-    /* Hover image */
-    .card__media {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;                      /* keeps the zoom variation inside the card */
-      border-radius: calc(var(--radius) - 1px);
-    }
-    .card__media img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      image-rendering: pixelated;            /* keep the pixel-art edges crisp when scaled */
-      pointer-events: none;
-    }
-    /* On an image, the label becomes a light chip so it stays readable */
-    .card:has(.card__media) .card__label { background: var(--bg); color: var(--fg); }
-
-    /* Horizon split: opens from the middle outward, echoing the loader lines */
-    .reveal-split img {
-      clip-path: inset(50% 0 50% 0);
-      transition: clip-path .6s var(--ease);
-    }
-    .reveal-split:hover img,
-    .reveal-split:focus-visible img { clip-path: inset(0 0 0 0); }
-
-    /* Fade: simple cross-fade in */
-    .reveal-fade img {
-      opacity: 0;
-      transition: opacity .45s ease;
-    }
-    .reveal-fade:hover img,
-    .reveal-fade:focus-visible img { opacity: 1; }
-
-    /* Pixel wipe: rises from the bottom in hard steps, like a pixel-art game */
-    .reveal-pixel img {
-      clip-path: inset(100% 0 0 0);
-      transition: clip-path .5s steps(8, end);
-    }
-    .reveal-pixel:hover img,
-    .reveal-pixel:focus-visible img { clip-path: inset(0 0 0 0); }
-
-    /* Zoom settle: fades in slightly zoomed, then eases back to rest */
-    .reveal-zoom img {
-      opacity: 0;
-      transform: scale(1.15);
-      transition: opacity .4s ease, transform .9s var(--ease-out);
-    }
-    .reveal-zoom:hover img,
-    .reveal-zoom:focus-visible img { opacity: 1; transform: scale(1); }
-
-    /* ---------- Command menu (⌘K) ---------- */
-    .cmdk {
-      width: min(560px, calc(100% - 32px));
-      margin: 15vh auto auto;
-      padding: 0;
-      border: 1px solid var(--fg);
-      border-radius: 10px;
-      background: var(--bg);
-      color: var(--fg);
-      box-shadow: 0 24px 60px rgba(30, 30, 30, .25);
-      overflow: hidden;
-    }
-    .cmdk::backdrop { background: rgba(30, 30, 30, .35); backdrop-filter: blur(2px); }
-    .cmdk[open] { animation: cmdk-in .18s ease-out; }
-    @keyframes cmdk-in { from { opacity: 0; transform: translateY(-6px) scale(.98); } }
-
-    .cmdk__grab { display: none; }
-
-    /* Phones / touch: the menu becomes an iOS-style bottom sheet that slides up,
-       with a grab handle you can drag down to dismiss. */
-    @media (max-width: 599px), (hover: none) and (pointer: coarse) {
-      .cmdk {
-        width: 100%;
-        max-width: 100%;
-        max-height: 85dvh;
-        margin: auto 0 0;
-        border: 0;
-        border-radius: 16px 16px 0 0;
-        padding-bottom: env(safe-area-inset-bottom);
-        box-shadow: 0 -12px 40px rgba(30, 30, 30, .18);
-      }
-      .cmdk[open] {
-        display: flex;
-        flex-direction: column;
-        animation: sheet-up .5s cubic-bezier(.32, .72, 0, 1);
-      }
-      .cmdk[open]::backdrop { animation: backdrop-in .4s ease; }
-      .cmdk__grab {
-        display: block;
-        flex: none;
-        padding: 10px 0 6px;
-        touch-action: none;                      /* we handle the drag ourselves */
-        cursor: grab;
-      }
-      .cmdk__grab::before {
-        content: "";
-        display: block;
-        width: 36px;
-        height: 5px;
-        margin: 0 auto;
-        border-radius: 3px;
-        background: rgba(27, 22, 20, .25);
-      }
-      .cmdk__input-row { flex: none; }
-      .cmdk__list { flex: 1; max-height: none; overscroll-behavior: contain; }
-      .cmdk__item { padding: 14px 12px; font-size: 1rem; }   /* bigger tap targets */
-      html.sheet-open { overflow: hidden; }
-    }
-    @keyframes sheet-up { from { transform: translateY(100%); } }
-    @keyframes backdrop-in { from { opacity: 0; } }
-
-    .cmdk__input-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 0 16px;
-      border-bottom: 1px dashed var(--line);
-    }
-    .cmdk__input {
-      flex: 1;
-      min-width: 0;
-      padding: 16px 0;
-      border: 0;
-      background: transparent;
-      color: var(--fg);
-      font: inherit;
-      font-size: 1rem;
-      outline: none;
-    }
-    .cmdk__input::placeholder { color: var(--muted); }
-
-    .cmdk__list { max-height: min(360px, 55vh); overflow-y: auto; padding: 8px; }
-    .cmdk__group + .cmdk__group { margin-top: 8px; }
-    .cmdk__heading {
-      padding: 6px 10px;
-      font-family: var(--mono);
-      font-size: .72rem;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      color: var(--muted);
-    }
-    .cmdk__item {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 10px;
-      border-radius: 6px;
-      font-size: .95rem;
-      cursor: pointer;
-    }
-    .cmdk__item small { color: var(--muted); font-family: var(--mono); font-size: .8rem; }
-    .cmdk__item[aria-selected="true"] { background: var(--fg); color: var(--bg); }
-    .cmdk__item[aria-selected="true"] small { color: var(--bg); opacity: .7; }
-    .cmdk__empty { padding: 24px 10px; text-align: center; color: var(--muted); font-size: .9rem; }
-
-    .cmdk__footer {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 16px;
-      border-top: 1px dashed var(--line);
-      font-size: .78rem;
-      color: var(--muted);
-    }
-    .cmdk__footer span { display: inline-flex; align-items: center; gap: 4px; }
-    .kbd {
-      display: inline-grid;
-      place-items: center;
-      min-width: 20px;
-      height: 20px;
-      padding: 0 5px;
-      border: 1px solid var(--muted);
-      border-radius: 3px;
-      font-family: var(--mono);
-      font-size: .72rem;
-      color: var(--fg);
-    }
-
-    /* Touch devices have no keyboard shortcut: just "Menu", and no key hints in the panel */
-    @media (hover: none) and (pointer: coarse) {
-      .cmdk-trigger, .btn-resume { padding: 8px 12px; }
-      .shortcut,
-      .cmdk .cmdk__footer { display: none; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { transition: none !important; animation: none !important; }
-    }
-  </style>
+  <title>Jofo Domingo — Hey</title>
+  <meta name="description" content="Jofo Domingo — Principal Product Designer. A New York based, Canadian Product Designer.">
+  <!-- Self-hosted fonts. The loader and hero fonts are preloaded because they show first. -->
+  <link rel="preload" href="assets/fonts/general-sans-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/brittany-signature-calloused.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="assets/fonts/brittany-signature-hero.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/maragsa-display-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <script>
+    // ?paper=off — compare the page without the paper texture
+    (() => { const v = new URLSearchParams(location.search).get('paper'); if (v) document.documentElement.dataset.paper = v; })();
+  </script>
+  <link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body class="loading">
-  <noscript><style>#loader { display: none; } body.loading { overflow: auto; } body.loading .app { opacity: 1; transform: none; }</style></noscript>
+  <noscript><style>#loader { display: none; } body.loading { overflow: auto; } body.loading .app { opacity: 1; }</style></noscript>
 
   <div id="loader" role="status" aria-label="Loading">
-    <span class="loader__dash"></span>
-    <p class="loader__words" aria-hidden="true">
-      <span class="loader__row"><span class="w" style="--i:0">You’re</span> <span class="w" style="--i:1">in</span></span>
-      <span class="loader__row"><span class="w w--serif" style="--i:2">calloused</span> <span class="w" style="--i:3">hands</span></span>
-    </p>
-  </div>
+    <div class="jf" aria-hidden="true">
+      <!-- Each letter is its own element so the browser can move it on the GPU, smoothly,
+           even while the video and page are loading -->
+      <div class="jf-j" data-w="49">
+        <svg class="jf-bob" viewBox="0 0 49 48" fill="currentColor">
+          <path d="M49 45.6941V3.69409C49 2.58952 48.1046 1.69409 47 1.69409H28C26.8954 1.69409 26 2.58952 26 3.69409V35.6941C26 36.7987 25.1046 37.6941 24 37.6941H23C21.8954 37.6941 21 36.7987 21 35.6941V23.6941C21 22.5895 20.1046 21.6941 19 21.6941H2C0.895431 21.6941 0 22.5895 0 23.6941V45.6941C0 46.7987 0.89543 47.6941 2 47.6941H47C48.1046 47.6941 49 46.7987 49 45.6941Z"/>
+          <path d="M7.51036 3.53823L7.91992 1.69409L17.6199 13.9367L2.00039 13.9173L3.19328 12.4526C4.43589 10.9267 6.27475 10.0091 8.2411 9.93355L8.66392 9.06046C7.50396 7.4709 7.08373 5.45922 7.51036 3.53823Z"/>
+        </svg>
+      </div>
+      <div class="jf-f" data-w="46">
+        <svg class="jf-bob" viewBox="253 0 46 48" fill="currentColor">
+          <path d="M273 47.6941H255C253.895 47.6941 253 46.7987 253 45.6941V3.69409C253 2.58952 253.895 1.69409 255 1.69409H297C298.105 1.69409 299 2.58952 299 3.69409V10.6941C299 11.7987 298.105 12.6941 297 12.6941H278C276.895 12.6941 276 13.5895 276 14.6941C276 15.7987 276.895 16.6941 278 16.6941H297C298.105 16.6941 299 17.5895 299 18.6941V26.6941C299 27.7987 298.105 28.6941 297 28.6941H277C275.895 28.6941 275 29.5895 275 30.6941V45.6941C275 46.7987 274.105 47.6941 273 47.6941Z"/>
+          <path d="M290.649 44.0261L290.24 45.8704L280.537 33.6301L296.157 33.6457L294.964 35.1108C293.722 36.6369 291.883 37.555 289.917 37.631L289.494 38.5042C290.655 40.0934 291.076 42.105 290.649 44.0261Z"/>
+        </svg>
+      </div>
 
-  <span class="rail" aria-hidden="true"></span>
+      <!-- "You're in" / "calloused hands", at the Figma positions (one layer per line) -->
+      <svg class="jf-line jf-line1" viewBox="506 380 500 222">
+        <text class="jf-youre" x="675" y="433.55">You’re in</text>
+      </svg>
+      <svg class="jf-line jf-line2" viewBox="506 380 500 222">
+        <g class="jf-calloused" transform="translate(716 456.6)">
+          <g class="jf-ink">
+            <path d="M2.50 -4.70 L2.60 -5.55 L2.45 -6.05 L2.15 -6.20 L1.55 -6.10 L1.00 -5.55 L0.35 -4.45 L-0.25 -2.45 L-0.30 -0.95 L-0.15 0.00 L0.05 0.55 L0.55 1.10 L0.75 1.20 L1.15 1.30 L1.70 1.30 L2.40 1.10 L3.05 0.70 L4.45 -0.65 L6.15 -2.85 L7.65 -5.10" data-len="20.4"/>
+            <path d="M10.05 -5.00 L9.90 -4.30 L9.30 -4.10 L7.30 -1.60 L6.85 -1.20 L6.50 -1.10 L6.25 -1.15 L6.15 -1.25 L6.05 -1.90 L6.20 -3.00 L6.65 -4.45 L7.20 -5.55 L7.65 -6.25 L8.15 -6.80 L8.80 -7.20 L9.35 -7.30 L9.90 -7.20 L10.30 -6.95 L10.75 -6.45" data-len="15.0"/>
+            <path d="M16.10 -4.95 L14.75 -2.50 L13.85 -1.25 L12.90 -0.30 L12.50 -0.05 L12.05 0.05 L11.40 -0.05 L10.90 -0.60 L10.60 -1.20 L10.20 -2.80 L10.10 -4.15 L9.95 -4.30" data-len="11.9"/>
+            <path d="M12.55 10.55 L12.65 10.10 L12.60 9.40 L12.75 8.15 L13.90 2.05 L15.85 -6.85 L17.30 -12.85 L18.30 -15.35 L18.90 -15.60 L19.05 -15.75 L19.80 -17.25 L20.60 -19.20 L21.05 -20.65 L21.15 -21.85 L20.95 -22.00 L20.40 -21.80 L19.75 -20.80 L19.05 -19.05 L18.25 -16.50 L18.15 -15.85 L18.15 -15.45 L18.25 -15.35" data-len="41.8"/>
+            <path d="M15.50 10.55 L15.50 10.20 L15.60 10.00 L15.55 9.25 L15.70 8.00 L17.10 0.75 L18.40 -5.20 L20.25 -12.95 L21.20 -15.20 L21.20 -15.30 L21.05 -15.45 L21.05 -15.75 L21.25 -16.75 L22.35 -20.05 L23.15 -21.60 L23.30 -21.75 L23.65 -21.90 L23.80 -21.95 L24.00 -21.90 L24.10 -21.75 L24.00 -20.75 L23.60 -19.40 L23.10 -18.10 L22.00 -15.80 L21.80 -15.55 L21.25 -15.30" data-len="41.7"/>
+            <path d="M21.15 -16.05 L21.55 -16.05 L21.90 -15.75" data-len="0.9"/>
+            <path d="M28.70 -4.90 L27.60 -3.75 L26.75 -3.15 L26.15 -2.85 L25.60 -2.65 L25.20 -2.60 L24.00 -2.60 L23.75 -2.70 L23.60 -2.10 L23.10 -1.40 L22.50 -1.00 L21.85 -0.90 L21.20 -1.10 L20.90 -1.40 L20.70 -1.70 L20.50 -2.30 L20.45 -2.80 L20.50 -3.65 L20.70 -4.30 L21.05 -4.90 L21.35 -5.15 L22.05 -5.30 L22.15 -4.50 L22.35 -3.95 L23.10 -3.15 L23.25 -3.10 L23.80 -2.95 L23.95 -3.10 L24.00 -3.95 L23.85 -5.60 L23.60 -6.15 L23.40 -6.35 L22.95 -6.40 L22.65 -6.30 L22.40 -6.05 L22.05 -5.35" data-len="23.3"/>
+            <path d="M28.25 -5.20 L28.05 -5.00 L27.80 -4.50 L27.45 -3.30 L27.40 -2.45 L27.60 -1.55 L27.85 -1.30 L28.15 -1.20 L28.70 -1.30 L29.65 -2.25 L30.20 -2.95 L30.90 -3.20 L30.95 -3.15 L30.90 -2.95 L30.70 -2.80 L30.60 -2.60 L30.55 -2.65 L30.60 -2.70" data-len="9.0"/>
+            <path d="M36.55 -4.75 L35.60 -3.30 L34.10 -1.35 L32.90 -0.15 L32.30 0.30 L31.95 0.45 L31.65 0.50 L31.40 0.45 L31.15 0.25 L31.05 0.05 L30.90 -0.90 L31.00 -2.20 L30.95 -2.95" data-len="11.1"/>
+            <path d="M39.90 -7.55 L39.55 -7.70 L39.10 -7.75 L38.55 -7.70 L38.05 -7.55 L37.20 -7.05 L36.70 -6.55 L36.40 -6.10 L36.10 -5.25 L36.05 -4.75 L36.10 -3.95 L36.40 -3.00 L37.30 -1.30 L38.65 0.80 L39.00 1.65 L39.25 1.85 L39.20 3.00 L39.40 3.20 L39.40 4.55 L39.25 5.35 L38.90 6.35 L38.50 7.15 L38.15 7.65 L37.15 8.60 L36.55 8.80 L36.30 8.75 L36.10 8.60 L36.05 7.90 L36.20 7.30 L36.90 5.80 L38.50 3.30 L39.15 3.00" data-len="28.3"/>
+            <path d="M45.50 -5.20 L41.05 0.00 L39.95 1.40 L39.65 1.70 L39.30 1.80" data-len="9.4"/>
+            <path d="M51.95 -5.00 L51.80 -4.90 L51.10 -3.90 L49.75 -2.25 L48.35 -0.80 L47.55 -0.10 L46.95 0.35 L46.20 0.70 L45.80 0.75 L45.10 0.70 L44.75 0.55 L44.55 0.35 L44.35 0.15 L44.10 -0.30 L43.90 -1.00 L43.85 -1.90 L44.00 -3.15 L44.45 -4.80 L45.10 -5.70 L45.20 -6.00 L45.60 -6.45 L45.60 -6.35" data-len="17.5"/>
+            <path d="M45.15 -6.35 L45.25 -6.85 L45.75 -7.70 L46.10 -8.20 L46.75 -8.85 L47.40 -9.00 L47.60 -8.80 L47.45 -8.00 L46.75 -6.95 L45.95 -6.10 L45.25 -5.90" data-len="7.9"/>
+            <path d="M60.20 -19.65 L60.15 -19.20 L60.00 -18.90 L59.30 -18.55 L58.50 -16.60 L57.80 -14.50 L56.95 -11.45 L56.85 -10.40 L57.00 -10.25 L57.00 -10.00 L55.85 -6.80 L55.65 -5.90 L55.20 -5.50 L55.15 -4.50 L55.05 -4.25 L54.45 -4.00 L54.30 -3.85 L53.10 -1.95 L52.35 -0.95 L51.50 -0.15 L51.10 -0.05 L50.70 -0.10 L50.55 -0.20 L50.35 -0.45 L50.20 -0.95 L50.15 -1.75 L50.25 -2.65 L50.65 -3.95 L51.00 -4.70 L51.75 -5.80 L52.45 -6.50 L53.05 -6.90 L53.70 -7.05 L54.25 -6.95 L54.55 -6.65 L54.70 -5.80 L55.05 -5.70 L55.20 -5.55" data-len="34.2"/>
+            <path d="M53.30 8.95 L53.85 4.20 L54.60 -0.40 L55.15 -3.15 L55.20 -4.15 L55.10 -4.25" data-len="13.4"/>
+            <path d="M53.30 9.00 L53.30 9.85 L53.45 9.95" data-len="1.0"/>
+            <path d="M57.00 -11.10 L57.35 -11.10 L57.75 -10.75 L57.65 -10.55 L57.05 -10.25" data-len="1.8"/>
+            <path d="M57.75 -10.80 L58.50 -12.65 L59.90 -16.95 L60.15 -18.05 L60.15 -18.60 L60.05 -18.85" data-len="8.5"/>
+          </g>
+          <text class="jf-word" letter-spacing="-0.72">calloused</text>
+        </g>
+        <text class="jf-hands" x="778" y="456.55">hands</text>
+      </svg>
+    </div>
+  </div>
 
   <div class="app">
     <header class="site-header">
-      <a class="logo" href="#design">JOFO DOMINGO</a>
+      <a class="brand" href="#hey">
+        <!-- Placeholder mark — swap in the SVG exported from Figma -->
+        <svg class="brand__mark" viewBox="0 0 51.5 23" fill="currentColor" aria-hidden="true">
+          <rect width="24.5" height="23" rx="1"/><rect x="28.5" width="23" height="23" rx="1"/>
+        </svg>
+        <span class="brand__text">
+          <span class="brand__name">JOFO DOMINGO</span>
+          <span class="brand__title">PRINCIPAL PRODUCT DESIGNER</span>
+        </span>
+      </a>
 
       <nav class="nav mono" aria-label="Sections">
-        <a href="#design" data-view-link="design" aria-current="page"><svg viewBox="0 0 9 12" aria-hidden="true"><path d="M1 0l8 6-8 6-1-1.4L5.7 6 0 1.4z" fill="currentColor"/></svg><span class="roll-text">Design</span></a>
-        <a href="#my-story" data-view-link="my-story"><svg viewBox="0 0 9 12" aria-hidden="true"><path d="M1 0l8 6-8 6-1-1.4L5.7 6 0 1.4z" fill="currentColor"/></svg><span class="roll-text">My Story</span></a>
-        <a href="#leadership" data-view-link="leadership"><svg viewBox="0 0 9 12" aria-hidden="true"><path d="M1 0l8 6-8 6-1-1.4L5.7 6 0 1.4z" fill="currentColor"/></svg><span class="roll-text">Leadership</span></a>
-        <a href="#reading" data-view-link="reading"><svg viewBox="0 0 9 12" aria-hidden="true"><path d="M1 0l8 6-8 6-1-1.4L5.7 6 0 1.4z" fill="currentColor"/></svg><span class="roll-text">Reading</span></a>
-        <a href="#writing" data-view-link="writing"><svg viewBox="0 0 9 12" aria-hidden="true"><path d="M1 0l8 6-8 6-1-1.4L5.7 6 0 1.4z" fill="currentColor"/></svg><span class="roll-text">Writing</span></a>
-        <a href="#on-ai" data-view-link="on-ai"><svg viewBox="0 0 9 12" aria-hidden="true"><path d="M1 0l8 6-8 6-1-1.4L5.7 6 0 1.4z" fill="currentColor"/></svg><span class="roll-text">On AI</span></a>
+        <a href="#hey" data-view-link="hey" aria-current="page"><svg viewBox="0 0 9 12" aria-hidden="true"><path d="M1 0l8 6-8 6-1-1.4L5.7 6 0 1.4z" fill="currentColor"/></svg><span class="roll-text">Hey</span></a>
+        <a href="#design" data-view-link="design"><svg viewBox="0 0 9 12" aria-hidden="true"><path d="M1 0l8 6-8 6-1-1.4L5.7 6 0 1.4z" fill="currentColor"/></svg><span class="roll-text">Design</span></a>
+        <a href="#" data-soon aria-disabled="true" title="Coming soon"><svg viewBox="0 0 9 12" aria-hidden="true"><path d="M1 0l8 6-8 6-1-1.4L5.7 6 0 1.4z" fill="currentColor"/></svg><span class="roll-text">My Story</span></a>
+        <a href="#" data-soon aria-disabled="true" title="Coming soon"><svg viewBox="0 0 9 12" aria-hidden="true"><path d="M1 0l8 6-8 6-1-1.4L5.7 6 0 1.4z" fill="currentColor"/></svg><span class="roll-text">Reading</span></a>
+        <a href="#" data-soon aria-disabled="true" title="Coming soon"><svg viewBox="0 0 9 12" aria-hidden="true"><path d="M1 0l8 6-8 6-1-1.4L5.7 6 0 1.4z" fill="currentColor"/></svg><span class="roll-text">Writing</span></a>
       </nav>
 
-      <div class="actions mono">
-        <a class="btn-resume" href="https://drive.google.com/file/d/1qdRgGNeCREqcYQyWY3CkIB4rInm5zlEG/view?usp=drive_link" target="_blank" rel="noopener" aria-keyshortcuts="Meta+J Control+J">
-          Resume
-          <span class="shortcut" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/></svg>J
-          </span>
-        </a>
-        <button class="cmdk-trigger mono" type="button" aria-haspopup="dialog" aria-keyshortcuts="Meta+K Control+K">
-          Menu
-          <span class="shortcut" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/></svg>K
-          </span>
+      <div class="header-right mono">
+        <button class="keycap sound" type="button" aria-pressed="true" aria-label="Sound">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M1.5 4.5h2l2.5-2v7l-2.5-2h-2z" fill="currentColor"/>
+            <path class="sound__wave" d="M8 4.2a2.5 2.5 0 0 1 0 3.6M9.6 2.8a4.5 4.5 0 0 1 0 6.4"/>
+            <path class="sound__off" d="M8 4.5l3 3M11 4.5l-3 3"/>
+          </svg>
         </button>
+
+        <div class="swap">
+        <div class="hint">
+          <span class="hint__keys">
+            <button class="keycap" type="button" data-step="-1" aria-label="Previous section">
+              <svg viewBox="0 0 9 12" aria-hidden="true"><path d="M8 0L0 6l8 6 1-1.4L3.3 6 9 1.4z" fill="currentColor"/></svg>
+            </button>
+            <button class="keycap" type="button" data-step="1" aria-label="Next section">
+              <svg viewBox="0 0 9 12" aria-hidden="true"><path d="M1 0l8 6-8 6-1-1.4L5.7 6 0 1.4z" fill="currentColor"/></svg>
+            </button>
+          </span>
+          <span>To navigate</span>
+        </div>
+
+        <div class="actions">
+          <a class="btn-resume" href="https://drive.google.com/file/d/1qdRgGNeCREqcYQyWY3CkIB4rInm5zlEG/view?usp=drive_link" target="_blank" rel="noopener" aria-keyshortcuts="Meta+J Control+J">
+            Resume
+            <span class="shortcut" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/></svg>J
+            </span>
+          </a>
+          <button class="cmdk-trigger mono" type="button" aria-haspopup="dialog" aria-keyshortcuts="Meta+K Control+K">
+            Menu
+            <span class="shortcut" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/></svg>K
+            </span>
+          </button>
+        </div>
+        </div>
       </div>
     </header>
 
-    <aside class="intro">
-      <h1 class="sr-only">Jofo Domingo — Design portfolio</h1>
-      <div class="intro__view" data-view="design">
-        <p>Hello! Kamusta? I’m Jofo Domingo</p>
-        <p>Welcome to my little nook on the wild wild web</p>
-      </div>
-      <div class="intro__view" data-view="my-story" hidden>
-        <p>My story</p>
-        <p>Where I come from, and the work that shaped me.</p>
-      </div>
-      <div class="intro__view" data-view="leadership" hidden>
-        <p>Leadership</p>
-        <p>Notes on building teams and leading design.</p>
-      </div>
-      <div class="intro__view" data-view="reading" hidden>
-        <p>Reading</p>
-        <p>Books and essays that stuck with me.</p>
-      </div>
-      <div class="intro__view" data-view="writing" hidden>
-        <p>Writing</p>
-        <p>Things I’ve written along the way.</p>
-      </div>
-      <div class="intro__view" data-view="on-ai" hidden>
-        <p>On AI</p>
-        <p>How I think about designing with and for AI.</p>
-      </div>
+    <section class="hero" id="hey">
+      <!-- Muted so browsers allow autoplay; sound fades in from JS (see the hero script) -->
+      <video class="hero__video" data-loader-wait autoplay muted loop playsinline preload="auto" poster="assets/images/hero-poster.jpg" aria-hidden="true">
+        <source src="assets/video/hero-park-dither.webm" type="video/webm">
+      </video>
+      <div class="hero__fade"></div>
 
-      <div class="status mono">
-        <span>Open to work</span>
-        <span class="status__place"><span>Brooklyn</span><time id="clock"></time></span>
-      </div>
-    </aside>
+      <h1 class="hero__title" aria-label="Relentlessly collaborative — Jofo Domingo, Principal Product Designer">
+        <span class="hero__w hero__w--1" aria-hidden="true"><span class="hero__cap">R</span>elentlessly</span>
+        <span class="hero__w hero__w--2" aria-hidden="true"><span class="hero__cap">C</span>ollaborative</span>
+      </h1>
+      <p class="hero__tagline">I’m a New York based, Canadian Product Designer</p>
+    </section>
 
-    <main id="projects" class="panel" aria-label="Projects">
-      <!-- One .projects block per section (data-view matches the nav link).
-           Projects alternate tall/short automatically. Add cards to either column.
-           Hover image: add a <picture class="card__media"> and a reveal class
-           (reveal-split, reveal-fade, reveal-pixel or reveal-zoom) to any card. -->
-      <div class="projects" data-view="design">
-        <div class="projects__col">
-          <a class="card reveal-split" href="#">
-            <picture class="card__media"><img src="images/sky.jpg" alt="" width="1400" height="349" decoding="async"></picture>
-            <span class="card__label">01 — Project</span>
+    <main id="design" class="panel" aria-label="Design projects">
+      <!-- Each project is an <a class="work">: a .card plus a caption (title, meta),
+           listed one after another. Hover image: put a
+           <picture class="card__media"> in the .card and add a reveal class to it
+           (reveal-split, reveal-fade, reveal-pixel or reveal-zoom).
+           Clicking opens the project modal; its page comes from the
+           <template class="card__detail"> inside the project (see Project One). -->
+      <div class="design">
+        <aside class="design__intro">
+          <div class="design__intro-inner">
+            <p class="design__eyebrow mono">Design</p>
+            <p>Selected product and brand work — the problems, the people, and what we made together.</p>
+            <p class="muted">Pick a project to read the story behind it.</p>
+          </div>
+        </aside>
+
+      <div class="projects">
+          <a class="work" href="#">
+            <div class="card reveal-split">
+              <picture class="card__media"><img src="assets/images/sky.jpg" alt="" width="1400" height="349" decoding="async"></picture>
+            </div>
+            <div class="work__caption"><p class="work__title">Project One</p><p class="work__meta">Product, 2026</p></div>
+            <template class="card__detail">
+              <p class="project__label">Product, 2026</p>
+              <h2 class="project__title" id="project-title">Project One</h2>
+              <div class="project__hero"><img src="assets/images/sky.jpg" alt="" width="1400" height="349"></div>
+              <dl class="project__meta">
+                <div><dt>Role</dt><dd>Lead designer</dd></div>
+                <div><dt>Year</dt><dd>2026</dd></div>
+                <div><dt>Team</dt><dd>—</dd></div>
+              </dl>
+              <div class="project__body">
+                <p>A short summary of the project: the problem, who it was for, and what you made.</p>
+                <p>Replace this with the full write-up — process, decisions and outcomes.</p>
+              </div>
+            </template>
           </a>
-          <a class="card" href="#"><span class="card__label">03 — Project</span></a>
-        </div>
-        <div class="projects__col">
-          <a class="card" href="#"><span class="card__label">02 — Project</span></a>
-          <a class="card" href="#"><span class="card__label">04 — Project</span></a>
-        </div>
+          <a class="work" href="#">
+            <div class="card"></div>
+            <div class="work__caption"><p class="work__title">Project Two</p><p class="work__meta">Product, 2025</p></div>
+          </a>
+          <a class="work" href="#">
+            <div class="card"></div>
+            <div class="work__caption"><p class="work__title">Project Three</p><p class="work__meta">Brand, 2025</p></div>
+          </a>
+          <a class="work" href="#">
+            <div class="card"></div>
+            <div class="work__caption"><p class="work__title">Project Four</p><p class="work__meta">Product, 2024—2025</p></div>
+          </a>
+          <a class="work" href="#">
+            <div class="card"></div>
+            <div class="work__caption"><p class="work__title">Project Five</p><p class="work__meta">Product, 2024</p></div>
+          </a>
+          <a class="work" href="#">
+            <div class="card"></div>
+            <div class="work__caption"><p class="work__title">Project Six</p><p class="work__meta">Brand, 2023</p></div>
+          </a>
       </div>
-      <div class="projects" data-view="my-story" hidden>
-        <div class="projects__col">
-          <a class="card" href="#"><span class="card__label">01 — My Story</span></a>
-          <a class="card" href="#"><span class="card__label">03 — My Story</span></a>
-        </div>
-        <div class="projects__col">
-          <a class="card" href="#"><span class="card__label">02 — My Story</span></a>
-          <a class="card" href="#"><span class="card__label">04 — My Story</span></a>
-        </div>
-      </div>
-      <div class="projects" data-view="leadership" hidden>
-        <div class="projects__col">
-          <a class="card" href="#"><span class="card__label">01 — Leadership</span></a>
-          <a class="card" href="#"><span class="card__label">03 — Leadership</span></a>
-        </div>
-        <div class="projects__col">
-          <a class="card" href="#"><span class="card__label">02 — Leadership</span></a>
-          <a class="card" href="#"><span class="card__label">04 — Leadership</span></a>
-        </div>
-      </div>
-      <div class="projects" data-view="reading" hidden>
-        <div class="projects__col">
-          <a class="card" href="#"><span class="card__label">01 — Reading</span></a>
-          <a class="card" href="#"><span class="card__label">03 — Reading</span></a>
-        </div>
-        <div class="projects__col">
-          <a class="card" href="#"><span class="card__label">02 — Reading</span></a>
-          <a class="card" href="#"><span class="card__label">04 — Reading</span></a>
-        </div>
-      </div>
-      <div class="projects" data-view="writing" hidden>
-        <div class="projects__col">
-          <a class="card" href="#"><span class="card__label">01 — Writing</span></a>
-          <a class="card" href="#"><span class="card__label">03 — Writing</span></a>
-        </div>
-        <div class="projects__col">
-          <a class="card" href="#"><span class="card__label">02 — Writing</span></a>
-          <a class="card" href="#"><span class="card__label">04 — Writing</span></a>
-        </div>
-      </div>
-      <div class="projects" data-view="on-ai" hidden>
-        <div class="projects__col">
-          <a class="card" href="#"><span class="card__label">01 — On AI</span></a>
-          <a class="card" href="#"><span class="card__label">03 — On AI</span></a>
-        </div>
-        <div class="projects__col">
-          <a class="card" href="#"><span class="card__label">02 — On AI</span></a>
-          <a class="card" href="#"><span class="card__label">04 — On AI</span></a>
-        </div>
       </div>
     </main>
+    <div class="panel-spacer" aria-hidden="true"></div>
   </div>
+
+  <div class="edge-blur edge-blur--top" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="edge-blur edge-blur--bottom" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+  <dialog class="project" aria-labelledby="project-title">
+    <button class="project__close" type="button" aria-label="Close project">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13"/></svg>
+    </button>
+    <div class="project__scroll"></div>
+  </dialog>
 
   <dialog class="cmdk" aria-label="Site search">
     <div class="cmdk__grab" aria-hidden="true"></div>
@@ -759,12 +226,8 @@
     <div class="cmdk__list" id="cmdk-list" role="listbox" aria-label="Suggestions" tabindex="-1">
       <div class="cmdk__group" role="presentation">
         <div class="cmdk__heading" aria-hidden="true">Go to</div>
+        <div class="cmdk__item" role="option" data-href="#hey">Hey</div>
         <div class="cmdk__item" role="option" data-href="#design">Design</div>
-        <div class="cmdk__item" role="option" data-href="#my-story">My Story</div>
-        <div class="cmdk__item" role="option" data-href="#leadership">Leadership</div>
-        <div class="cmdk__item" role="option" data-href="#reading">Reading</div>
-        <div class="cmdk__item" role="option" data-href="#writing">Writing</div>
-        <div class="cmdk__item" role="option" data-href="#on-ai">On AI</div>
       </div>
       <div class="cmdk__group" role="presentation">
         <div class="cmdk__heading" aria-hidden="true">Links</div>
@@ -782,382 +245,14 @@
     </div>
   </dialog>
 
-  <script>
-    (() => {
-      const loader = document.getElementById('loader');
+  <script src="assets/js/loader.js"></script>
 
-      const sleep = ms => new Promise(r => setTimeout(r, ms));
-      const pageLoaded = new Promise(r =>
-        document.readyState === 'complete' ? r() : addEventListener('load', r, { once: true })
-      );
+  <script src="assets/js/hero.js"></script>
 
-      let finished = false;
-      const finish = () => {
-        if (finished) return;
-        finished = true;
-        loader.classList.add('done');
-        document.body.classList.remove('loading');
-        document.dispatchEvent(new Event('app:ready'));
-        setTimeout(() => loader.remove(), 700);
-      };
+  <script src="assets/js/sections.js"></script>
 
-      async function run() {
-        if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          await pageLoaded;
-          return finish();
-        }
+  <script src="assets/js/project-modal.js"></script>
 
-        // Wait for the loader fonts (max 1s; a failed load just uses the fallback)
-        await Promise.race([
-          Promise.all([
-            document.fonts.load('600 1em "General Sans"'),
-            document.fonts.load('italic 400 1em "Newsreader"', 'calloused'),
-          ]).catch(() => {}),
-          sleep(1000),
-        ]);
-        await sleep(200);
-
-        // 1. Line draws down; words stagger in as it eases to a stop (all in CSS)
-        loader.offsetWidth; // commit the starting state before animating
-        loader.classList.add('in');
-
-        // 2. Hold on the finished phrase, then reveal the page
-        await Promise.all([sleep(2700), pageLoaded]);
-        finish();
-      }
-
-      // Never trap the visitor: any error, or 8s passing, reveals the page anyway
-      run().catch(finish);
-      setTimeout(finish, 8000);
-    })();
-  </script>
-
-  <script>
-    // Brooklyn clock: current New York time, updated on the minute
-    (() => {
-      const el = document.getElementById('clock');
-      const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' });
-      let timer;
-      const tick = () => {
-        const now = new Date();
-        el.textContent = fmt.format(now);
-        el.dateTime = now.toISOString();
-        clearTimeout(timer);
-        timer = setTimeout(tick, 60000 - (now.getSeconds() * 1000 + now.getMilliseconds()));
-      };
-      tick();
-      // Background tabs throttle timers, so refresh as soon as the tab is visible again
-      document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
-    })();
-
-    // Desktop: the page itself doesn't scroll, so scrolling anywhere moves the projects panel
-    (() => {
-      const panel = document.querySelector('.panel');
-      const desktop = matchMedia('(min-width: 900px)');
-      addEventListener('wheel', e => {
-        if (desktop.matches && !panel.contains(e.target) && !document.querySelector('.cmdk[open]')) {
-          panel.scrollBy({ top: e.deltaY, left: 0 });
-        }
-      }, { passive: true });
-    })();
-  </script>
-
-  <script>
-    // Sections: nav links, ← / → keys and the menu switch between views via the URL hash
-    (() => {
-      const links = [...document.querySelectorAll('[data-view-link]')];
-      const ids = links.map(a => a.dataset.viewLink);
-      const panel = document.querySelector('.panel');
-      const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const easeOut = 'cubic-bezier(.16, 1, .3, 1)';
-      const easeIn = 'cubic-bezier(.7, 0, .84, 0)';
-
-      // Split each nav label into letters for the hover roll
-      links.forEach(a => {
-        const label = a.querySelector('.roll-text');
-        const text = label.textContent;
-        a.setAttribute('aria-label', text);
-        label.className = 'roll';
-        label.setAttribute('aria-hidden', 'true');
-        label.innerHTML = [...text].map((ch, i) =>
-          `<span class="roll__c" style="--i:${i}"><span>${ch}</span><span>${ch}</span></span>`
-        ).join('');
-      });
-
-      const intro = id => document.querySelector(`.intro__view[data-view="${id}"]`);
-      const projects = id => document.querySelector(`.projects[data-view="${id}"]`);
-      const idFromHash = () => {
-        const id = location.hash.slice(1);
-        return ids.includes(id) ? id : null;
-      };
-
-      // Cards in visual order: top to bottom, then left to right
-      const cardsOf = id => [...projects(id).querySelectorAll('.card')].sort((a, b) => {
-        const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
-        return Math.abs(ra.top - rb.top) > 4 ? ra.top - rb.top : ra.left - rb.left;
-      });
-
-      const play = (els, frames, opts) =>
-        Promise.all(els.map((el, i) => el.animate(frames, { ...opts, delay: (opts.delay || 0) + i * opts.stagger }).finished));
-
-      const animateIn = id => {
-        if (reduce()) return Promise.resolve();
-        return Promise.all([
-          play([...intro(id).children],
-            [{ opacity: 0, transform: 'translateY(12px)', filter: 'blur(3px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }],
-            { duration: 600, stagger: 80, easing: easeOut, fill: 'backwards' }),
-          play(cardsOf(id),
-            [{ opacity: 0, transform: 'translateY(28px) scale(.97)' }, { opacity: 1, transform: 'none' }],
-            { duration: 700, delay: 120, stagger: 90, easing: easeOut, fill: 'backwards' }),
-        ]);
-      };
-
-      const animateOut = id => {
-        if (reduce()) return Promise.resolve();
-        return Promise.all([
-          play([...intro(id).children],
-            [{ opacity: 1, transform: 'none', filter: 'blur(0)' }, { opacity: 0, transform: 'translateY(-10px)', filter: 'blur(3px)' }],
-            { duration: 260, stagger: 50, easing: easeIn, fill: 'forwards' }),
-          play([...projects(id).querySelectorAll('.card')],
-            [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(10px)' }],
-            { duration: 220, stagger: 0, easing: easeIn, fill: 'forwards' }),
-        ]);
-      };
-
-      const setVisible = id => {
-        ids.forEach(v => {
-          intro(v).hidden = v !== id;
-          projects(v).hidden = v !== id;
-        });
-        links.forEach(a => a.dataset.viewLink === id ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
-        const label = links[ids.indexOf(id)].getAttribute('aria-label');
-        document.title = id === 'design' ? 'Jofo Domingo — Design' : `${label} — Jofo Domingo`;
-      };
-
-      let current = idFromHash() || ids[0];
-      let busy = false;
-      let pending = null;
-      setVisible(current);
-
-      // First load: stagger in once the loader hands over
-      const ready = () => animateIn(current);
-      document.body.classList.contains('loading')
-        ? document.addEventListener('app:ready', ready, { once: true })
-        : ready();
-
-      const go = async id => {
-        if (id === current) return;
-        if (busy) { pending = id; return; }
-        busy = true;
-        const from = current;
-        current = id;
-
-        // 1. Old content leaves, 2. swap, 3. new content staggers in
-        await animateOut(from);
-        [...intro(from).children, ...projects(from).querySelectorAll('.card')]
-          .forEach(el => el.getAnimations().forEach(a => a.cancel()));
-        setVisible(id);
-        panel.scrollTop = 0;
-        await animateIn(id);
-
-        busy = false;
-        const next = pending;
-        pending = null;
-        if (next && next !== current) go(next);
-      };
-
-      addEventListener('hashchange', () => { const id = idFromHash(); if (id) go(id); });
-
-      // ← / → step through the sections (wrapping around)
-      document.addEventListener('keydown', e => {
-        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-        if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
-        if (document.body.classList.contains('loading') || document.querySelector('.cmdk[open]')) return;
-        if (e.target.closest('input, textarea, select, [contenteditable]')) return;
-        e.preventDefault();
-        const step = e.key === 'ArrowRight' ? 1 : -1;
-        const from = pending || current;
-        location.hash = ids[(ids.indexOf(from) + step + ids.length) % ids.length];
-      });
-    })();
-  </script>
-
-  <script>
-    // Command menu: ⌘K / Ctrl+K or the header button opens it
-    (() => {
-      const dialog = document.querySelector('.cmdk');
-      const input = dialog.querySelector('.cmdk__input');
-      const items = [...dialog.querySelectorAll('.cmdk__item')];
-      const groups = [...dialog.querySelectorAll('.cmdk__group')];
-      const empty = dialog.querySelector('.cmdk__empty');
-      const trigger = document.querySelector('.cmdk-trigger');
-      const list = dialog.querySelector('.cmdk__list');
-      const sheetQuery = matchMedia('(max-width: 599px), (hover: none) and (pointer: coarse)');
-      const isSheet = () => sheetQuery.matches;
-      const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-      let visible = items;
-      let index = 0;
-
-      items.forEach((item, i) => (item.id = `cmdk-item-${i}`));
-
-      const select = i => {
-        index = (i + visible.length) % visible.length;
-        items.forEach(item => item.setAttribute('aria-selected', 'false'));
-        const current = visible[index];
-        if (!current) return input.removeAttribute('aria-activedescendant');
-        current.setAttribute('aria-selected', 'true');
-        input.setAttribute('aria-activedescendant', current.id);
-        current.scrollIntoView({ block: 'nearest' });
-      };
-
-      const filter = () => {
-        const q = input.value.trim().toLowerCase();
-        visible = items.filter(item => {
-          const match = item.textContent.toLowerCase().includes(q);
-          item.hidden = !match;
-          return match;
-        });
-        groups.forEach(g => (g.hidden = !g.querySelector('.cmdk__item:not([hidden])')));
-        empty.hidden = visible.length > 0;
-        select(0);
-      };
-
-      // Click sound on open (~28 KB). Rewinds so quick repeat opens still click;
-      // play() can be refused by the browser, which is safely ignored.
-      const clickSound = new Audio('sounds/click.mp3');
-      clickSound.preload = 'auto';
-      clickSound.volume = 0.6;
-
-      // Soft tick for moving up/down the list, synthesised (no file to download)
-      let audioCtx;
-      const tick = () => {
-        try {
-          audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
-          const t = audioCtx.currentTime;
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(1800, t);
-          osc.frequency.exponentialRampToValueAtTime(900, t + 0.03);
-          gain.gain.setValueAtTime(0.0001, t);
-          gain.gain.exponentialRampToValueAtTime(0.08, t + 0.004);
-          gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
-          osc.connect(gain).connect(audioCtx.destination);
-          osc.start(t);
-          osc.stop(t + 0.06);
-        } catch {}
-      };
-
-      const open = () => {
-        if (dialog.open) return;
-        clickSound.currentTime = 0;
-        clickSound.play().catch(() => {});
-        input.value = '';
-        filter();
-        // As a sheet, don't focus the search box — that would pop the keyboard over it
-        list.toggleAttribute('autofocus', isSheet());
-        input.toggleAttribute('autofocus', !isSheet());
-        dialog.showModal();
-        if (isSheet()) document.documentElement.classList.add('sheet-open');
-      };
-
-      // Desktop closes instantly; the sheet slides back down first
-      let closing = false;
-      const close = async (fromY = 0) => {
-        if (!dialog.open || closing) return;
-        if (isSheet() && !reduceMotion()) {
-          closing = true;
-          const opts = { duration: 280, easing: 'cubic-bezier(.32, .72, 0, 1)', fill: 'forwards' };
-          const slide = dialog.animate([{ transform: `translateY(${fromY}px)` }, { transform: 'translateY(100%)' }], opts);
-          try { dialog.animate([{ opacity: 1 }, { opacity: 0 }], { ...opts, pseudoElement: '::backdrop' }); } catch {}
-          await slide.finished;
-          dialog.getAnimations({ subtree: true }).forEach(a => a.cancel());
-          dialog.style.transform = '';
-          closing = false;
-        }
-        dialog.close();
-      };
-      dialog.addEventListener('close', () => document.documentElement.classList.remove('sheet-open'));
-      // Esc on the sheet: run the slide-down instead of closing instantly
-      dialog.addEventListener('cancel', e => { if (isSheet()) { e.preventDefault(); close(); } });
-
-      // Drag the handle down to dismiss (far enough, or a quick flick); otherwise it springs back
-      const grab = dialog.querySelector('.cmdk__grab');
-      let startY = 0, startT = 0, dy = 0, dragging = false;
-      grab.addEventListener('pointerdown', e => {
-        dragging = true;
-        startY = e.clientY;
-        startT = performance.now();
-        dy = 0;
-        grab.setPointerCapture(e.pointerId);
-        dialog.style.transition = 'none';
-      });
-      grab.addEventListener('pointermove', e => {
-        if (!dragging) return;
-        dy = Math.max(0, e.clientY - startY);
-        dialog.style.transform = `translateY(${dy}px)`;
-      });
-      const endDrag = () => {
-        if (!dragging) return;
-        dragging = false;
-        const velocity = dy / (performance.now() - startT);   // px per ms
-        if (dy > 120 || velocity > 0.6) {
-          close(dy);
-        } else {
-          dialog.style.transition = 'transform .35s cubic-bezier(.32, .72, 0, 1)';
-          dialog.style.transform = '';
-        }
-      };
-      grab.addEventListener('pointerup', endDrag);
-      grab.addEventListener('pointercancel', endDrag);
-
-      const run = item => {
-        if (!item) return;
-        close();
-        const href = item.dataset.href;
-        if ('external' in item.dataset) {
-          window.open(href, '_blank', 'noopener');
-        } else if (href.startsWith('#')) {
-          location.hash = href;   // the section router handles the switch
-        } else {
-          location.href = href;
-        }
-      };
-
-      const resume = document.querySelector('.btn-resume');
-
-      document.addEventListener('keydown', e => {
-        if (!(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey) return;
-        if (document.body.classList.contains('loading')) return;
-        const key = e.key.toLowerCase();
-        if (key === 'k') {
-          e.preventDefault();
-          dialog.open ? close() : open();
-        } else if (key === 'j') {
-          // ⌘J / Ctrl+J: open the resume in a new tab
-          e.preventDefault();
-          close();
-          window.open(resume.href, '_blank', 'noopener');
-        }
-      });
-
-      input.addEventListener('input', filter);
-      input.addEventListener('keydown', e => {
-        if (e.key === 'ArrowDown') { e.preventDefault(); select(index + 1); tick(); }
-        else if (e.key === 'ArrowUp') { e.preventDefault(); select(index - 1); tick(); }
-        else if (e.key === 'Enter') { e.preventDefault(); run(visible[index]); }
-      });
-
-      items.forEach(item => {
-        item.addEventListener('mousemove', () => select(visible.indexOf(item)));
-        item.addEventListener('click', () => run(item));
-      });
-
-      // Click on the backdrop (outside the panel) closes it
-      dialog.addEventListener('click', e => { if (e.target === dialog) close(); });   // tap outside
-      dialog.addEventListener('close', () => trigger.focus({ preventScroll: true }));
-      trigger.addEventListener('click', open);
-    })();
-  </script>
+  <script src="assets/js/command-menu.js"></script>
 </body>
 </html>
